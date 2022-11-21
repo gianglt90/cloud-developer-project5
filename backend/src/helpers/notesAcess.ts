@@ -17,7 +17,7 @@ export class NotesAccess {
   }
 
   async getAllNotes(userId: string): Promise<NoteItem[]> {
-    console.log('Getting all noteItems')
+    console.log('Getting all noteItems ' + userId)
 
     const result = await this.docClient.query({
       TableName: this.notesTable,

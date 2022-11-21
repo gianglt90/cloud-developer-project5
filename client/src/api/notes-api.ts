@@ -27,7 +27,6 @@ export async function createNote(
       'Authorization': `Bearer ${idToken}`
     }
   })
-  alert('Note creation 2')
   return response.data.item
 }
 

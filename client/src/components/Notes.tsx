@@ -22,6 +22,7 @@ interface NotesProps {
 
 interface NotesState {
   notes: Note[]
+  note: string
   newNoteName: string
   loadingNotes: boolean
 }
@@ -29,6 +30,7 @@ interface NotesState {
 export class Notes extends React.PureComponent<NotesProps, NotesState> {
   state: NotesState = {
     notes: [],
+    note: "",
     newNoteName: '',
     loadingNotes: true
   }
@@ -37,17 +39,24 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
     this.setState({ newNoteName: event.target.value })
   }
 
-  onEditButtonClick = (noteId: string) => {
-    this.props.history.push(`/notes/${noteId}/edit`)
+  handleNoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ note: event.target.value})
+  }
+
+  onEditButtonClick = (noteId: string, noteName: string, note: string) => {
+    const enote: { [key: string]: string | string } = {};
+    enote.name = noteName;
+    enote.note = note;
+    this.props.history.push(`/notes/${noteId}/edit`, enote)
   }
 
   onNoteCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
+      alert(this.state.newNoteName)
       const newNote = await createNote(this.props.auth.getIdToken(), {
         name: this.state.newNoteName,
-        note: 'this.state.notes this.state.notesthis.state.notesthis.state.notesthis.state.notesthis.state.notesthis.state.notes'
+        note: this.state.note
       })
-      alert('Note creation 1')
       this.setState({
         notes: [...this.state.notes, newNote],
         newNoteName: ''
@@ -84,23 +93,28 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
   renderCreateNoteInput() {
     return (
       <Grid.Row>
-        <Grid.Column width={16}>
+        <Grid.Column width={10}>
           <Input
             action={{
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New task',
+              content: 'New Notes',
               onClick: this.onNoteCreate
             }}
             fluid
             actionPosition="left"
-            placeholder="To change the world..."
+            placeholder="Note title"
             onChange={this.handleNameChange}
           />
         </Grid.Column>
         <Grid.Column width={16}>
-          <Divider />
+        <Input
+            fluid
+            actionPosition="left"
+            placeholder="Note content"
+            onChange={this.handleNoteChange}
+          />
         </Grid.Column>
       </Grid.Row>
     )
@@ -131,13 +145,16 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
           return (
             <Grid.Row key={note.noteId}>
               <Grid.Column width={10} verticalAlign="middle">
-                {note.name}
+                <b>{note.name}</b>
+              </Grid.Column>
+              <Grid.Column width={10} verticalAlign="middle">
+                {note.note}
               </Grid.Column>
               <Grid.Column width={1} floated="right">
                 <Button
                   icon
                   color="blue"
-                  onClick={() => this.onEditButtonClick(note.noteId)}
+                  onClick={() => this.onEditButtonClick(note.noteId, note.name, note.note)}
                 >
                   <Icon name="pencil" />
                 </Button>

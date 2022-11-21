@@ -22,7 +22,7 @@ provider:
   # Use these variables in the functions and resouorces section below. For example, 
   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
-    NOTES_TABLE: Notes-${self:provider.stage}
+    NOTES_TABLE: Note-${self:provider.stage}
     NOTES_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: gianglt90-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
@@ -123,8 +123,6 @@ resources:
             AttributeType: S
           - AttributeName: noteId
             AttributeType: S
-          - AttributeName: createdAt
-            AttributeType: S  
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
@@ -136,7 +134,7 @@ resources:
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
-              - AttributeName: createdAt
+              - AttributeName: noteId
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
