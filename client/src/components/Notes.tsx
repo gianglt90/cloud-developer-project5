@@ -53,7 +53,6 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
 
   onNoteCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
-      alert(this.state.newNoteName)
       const newNote = await createNote(this.props.auth.getIdToken(), {
         name: this.state.newNoteName,
         note: this.state.note
@@ -63,7 +62,7 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
         newNoteName: ''
       })
     } catch {
-      alert('Note creation failed')
+      alert('Note creation failed! The note content should be greater than 100 characters')
     }
   }
 
