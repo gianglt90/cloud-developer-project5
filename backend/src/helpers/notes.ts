@@ -4,9 +4,19 @@ import { NoteUpdate } from '../models/NoteUpdate'
 import { CreateRequest } from '../requests/CreateRequest'
 import { UpdateNoteRequest } from '../requests/UpdateNoteRequest'
 import * as uuid from 'uuid'
+import { createLogger } from '../utils/logger'
+import { AttachmentUtils } from './attachmentUtils';
+import * as AWS from 'aws-sdk'
 // Note: Implement businessLogic
+const logger = createLogger('Todos business logic')
 
-  
+const s3 = new AWS.S3({
+  signatureVersion: 'v4'
+})
+const attachmentUtils = new AttachmentUtils();
+const bucketName = process.env.ATTACHMENT_S3_BUCKET
+const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+
   const noteAccess = new NotesAccess();
   export async function getAllNotes(userId: string): Promise<NoteItem[]> {
     return await noteAccess.getAllNotes(userId);
@@ -28,5 +38,27 @@ import * as uuid from 'uuid'
     return await noteAccess.updateNote(NoteId, userId, {
       name: updateNoteRequest.name,
       note: updateNoteRequest.note
+    })
+  }
+
+  export async function createAttachmentUrl (noteId: string, userId: string) {
+    logger.info('create attachment url')
+    const timestamp = new Date().toISOString()
+    const imageId = uuid.v4()
+    const newItem = {
+      noteId,
+      timestamp,
+      imageId,
+      imageUrl: `https://${bucketName}.s3.amazonaws.com/${imageId}`
+    }
+    await attachmentUtils.updateAttachmentUrl(noteId, userId, newItem.imageUrl)
+    return getUploadUrl(imageId)
+  }
+  
+  function getUploadUrl(imageId: string) {
+    return s3.getSignedUrl('putObject', {
+      Bucket: bucketName,
+      Key: imageId,
+      Expires: parseInt(urlExpiration)
     })
   }

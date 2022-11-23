@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Form, Button, Input } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
-import { patchNote } from '../api/notes-api'
+import { patchNote, getUploadUrl, uploadFile } from '../api/notes-api'
 import { History } from 'history'
 
 interface EditNoteProps {
@@ -18,8 +18,15 @@ interface EditNoteState {
   enote: { [key: string]: string | string }
   newNoteName: string
   newNote: string
+  file: any
+  uploadState: UploadState
 }
 
+enum UploadState {
+  NoUpload,
+  FetchingPresignedUrl,
+  UploadingFile,
+}
 
 export class EditNote extends React.PureComponent<
   EditNoteProps,
@@ -28,7 +35,9 @@ export class EditNote extends React.PureComponent<
   state: EditNoteState = {
     enote: this.props.history.location.state as { [key: string]: string | string },
     newNoteName: '',
-    newNote: ''
+    newNote: '',
+    file: undefined,
+    uploadState: UploadState.NoUpload
   }
 
 
@@ -52,11 +61,38 @@ export class EditNote extends React.PureComponent<
 
   handleSubmit = async (event: React.SyntheticEvent)  => {
 
+    if (!this.state.file) {
+      alert('File should be selected')
+      return
+    }
+
     await patchNote(this.props.auth.getIdToken(), this.props.match.params.noteId, {
       name: this.state.newNoteName,
       note: this.state.newNote
     })
+
+    this.setUploadState(UploadState.FetchingPresignedUrl)
+    const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.noteId)
+
+    this.setUploadState(UploadState.UploadingFile)
+    await uploadFile(uploadUrl, this.state.file)
+
     this.props.history.push(`/`)
+  }
+
+  setUploadState(uploadState: UploadState) {
+    this.setState({
+       uploadState
+    })
+  }
+
+  handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files) return
+
+    this.setState({
+      file: files[0]
+    })
   }
 
   render() {
@@ -79,7 +115,15 @@ export class EditNote extends React.PureComponent<
             onChange={this.handleNoteChange}
             value = {this.state.enote.note}
           />
-
+          <Form.Field>
+            <label>File</label>
+            <input
+              type="file"
+              accept="image/*"
+              placeholder="Image to upload"
+              onChange={this.handleFileChange}
+            />
+          </Form.Field>
           {this.renderButton()}
         </Form>
       </div>

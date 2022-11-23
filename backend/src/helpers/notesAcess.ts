@@ -17,8 +17,7 @@ export class NotesAccess {
   }
 
   async getAllNotes(userId: string): Promise<NoteItem[]> {
-    console.log('Getting all noteItems ' + userId)
-
+    logger.info('Getting all noteItems ', userId)
     const result = await this.docClient.query({
       TableName: this.notesTable,
       IndexName: this.noteCreatedIndex,
@@ -27,7 +26,7 @@ export class NotesAccess {
         ':pk': userId
       }
     }).promise()
-    console.log('Getting all noteItems successful')
+    logger.info('Getting all noteItems successful')
     const items = result.Items
     return items as NoteItem[]
   }
@@ -37,7 +36,7 @@ export class NotesAccess {
       TableName: this.notesTable,
       Item: noteItem
     }).promise()
-
+    logger.info('Create note item successful')
     return noteItem
   }
 
@@ -59,7 +58,7 @@ export class NotesAccess {
         ":note": updateNoteItem.note
       }
     }).promise()
-
+    logger.info('Update note item successful')
     return updateNoteItem
   }
 }

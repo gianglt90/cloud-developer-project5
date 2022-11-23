@@ -24,7 +24,7 @@ provider:
   environment:
     NOTES_TABLE: Note-${self:provider.stage}
     NOTES_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: gianglt90-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: gianglt90-note-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   logs:
@@ -101,6 +101,20 @@ functions:
         Action:
           - dynamodb:UpdateItem
         Resource: !GetAtt NotesTable.Arn
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: notes/{noteId}/attachment
+          cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+          - '*'
+        Resource: !GetAtt AttachmentsBucket.Arn
 resources:
   Resources:
     # Add necessary AWS resources. You will need at least the following AWS resources
@@ -138,3 +152,37 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+    AttachmentsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.ATTACHMENT_S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    # TODO: Complete the policy below and attach it to the bucket defined above
+    # For cross referencing the name of the bucket, use "!Ref AttachmentsBucket"
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: serverlessBucketPolicy
+          Version: '2012-10-17'
+          Statement:
+            - Principal: '*'
+              Effect: Allow
+              Action:
+                - 's3:GetObject'
+                - 's3:PutObject'
+              Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
+        Bucket: !Ref AttachmentsBucket

@@ -8,7 +8,8 @@ import {
   Header,
   Icon,
   Input,
-  Loader
+  Loader,
+  Image
 } from 'semantic-ui-react'
 
 import { createNote, getNotes } from '../api/notes-api'
@@ -158,9 +159,9 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
                 >
                   <Icon name="pencil" />
                 </Button>
-              </Grid.Column>
+              </Grid.Column>              
               <Grid.Column width={16}>
-                <Divider />
+              <Image src={note.attachmentUrl} size="small" wrapped />
               </Grid.Column>
             </Grid.Row>
           )

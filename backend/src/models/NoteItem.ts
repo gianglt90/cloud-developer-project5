@@ -3,4 +3,5 @@ export interface NoteItem {
   noteId: string
   name: string
   note: string
+  attachmentUrl?: string
 }
