@@ -61,6 +61,22 @@ export class NotesAccess {
     logger.info('Update note item successful')
     return updateNoteItem
   }
+
+  async deleteNote(noteId: String, userId: String) {
+    logger.info('Delete note')
+
+    await this.docClient.delete({
+      TableName: this.notesTable,
+      Key: {
+        noteId: noteId,
+        userId: userId
+      }
+    }, (err) => {
+      if (err) {
+        throw new Error("")
+      }
+    }).promise()
+  }
 }
 
 function createDynamoDBClient() {

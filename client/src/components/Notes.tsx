@@ -3,7 +3,6 @@ import { History } from 'history'
 import * as React from 'react'
 import {
   Button,
-  Divider,
   Grid,
   Header,
   Icon,
@@ -12,7 +11,7 @@ import {
   Image
 } from 'semantic-ui-react'
 
-import { createNote, getNotes } from '../api/notes-api'
+import { createNote, getNotes, deleteNote } from '../api/notes-api'
 import Auth from '../auth/Auth'
 import { Note } from '../types/Note'
 
@@ -65,6 +64,18 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
       alert('Note creation failed! The note content should be greater than 100 characters')
     }
   }
+
+  onNoteDelete = async (noteId: string) => {
+    try {
+      await deleteNote(this.props.auth.getIdToken(), noteId)
+      this.setState({
+        notes: this.state.notes.filter(note => note.noteId !== noteId)
+      })
+    } catch {
+      alert('Note deletion failed')
+    }
+  }
+
 
   async componentDidMount() {
     try {
@@ -144,21 +155,30 @@ export class Notes extends React.PureComponent<NotesProps, NotesState> {
         {this.state.notes.map((note, pos) => {
           return (
             <Grid.Row key={note.noteId}>
-              <Grid.Column width={10} verticalAlign="middle">
-                <b>{note.name}</b>
+              <Grid.Column width={16} verticalAlign="middle">
+              <Grid.Row >
+                  <b>{note.name}</b>
+                  <Button
+                    floated='right'
+                    icon
+                    color="blue"
+                    onClick={() => this.onEditButtonClick(note.noteId, note.name, note.note)}
+                  >
+                    <Icon name="pencil" />
+                  </Button>
+                  <Button
+                    floated='right'
+                    icon
+                    color="red"
+                    onClick={() => this.onNoteDelete(note.noteId)}
+                  >
+                    <Icon name="delete" />
+                  </Button>
+              </Grid.Row>
               </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
+              <Grid.Column width={16} verticalAlign="middle">
                 {note.note}
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(note.noteId, note.name, note.note)}
-                >
-                  <Icon name="pencil" />
-                </Button>
-              </Grid.Column>              
+              </Grid.Column>                         
               <Grid.Column width={16}>
               <Image src={note.attachmentUrl} size="small" wrapped />
               </Grid.Column>

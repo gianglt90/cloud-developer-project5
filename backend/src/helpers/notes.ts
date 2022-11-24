@@ -1,11 +1,11 @@
-import { NotesAccess } from './notesAcess'
+import { NotesAccess } from '../dataaccess/notesAcess'
 import { NoteItem } from '../models/NoteItem'
 import { NoteUpdate } from '../models/NoteUpdate'
 import { CreateRequest } from '../requests/CreateRequest'
 import { UpdateNoteRequest } from '../requests/UpdateNoteRequest'
 import * as uuid from 'uuid'
 import { createLogger } from '../utils/logger'
-import { AttachmentUtils } from './attachmentUtils';
+import { AttachmentUtils } from '../dataaccess/attachmentUtils';
 import * as AWS from 'aws-sdk'
 // Note: Implement businessLogic
 const logger = createLogger('Todos business logic')
@@ -39,6 +39,10 @@ const urlExpiration = process.env.SIGNED_URL_EXPIRATION
       name: updateNoteRequest.name,
       note: updateNoteRequest.note
     })
+  }
+
+  export async function deleteNote(todoId: string, userId: string) {
+    await noteAccess.deleteNote(todoId, userId)
   }
 
   export async function createAttachmentUrl (noteId: string, userId: string) {

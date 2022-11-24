@@ -115,6 +115,18 @@ functions:
           - s3:GetObject
           - '*'
         Resource: !GetAtt AttachmentsBucket.Arn
+  DeleteNote:
+    handler: src/lambda/http/deleteNote.handler
+    events:
+      - http:
+          method: delete
+          path: notes/{noteId}
+          cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: !GetAtt NotesTable.Arn
 resources:
   Resources:
     # Add necessary AWS resources. You will need at least the following AWS resources

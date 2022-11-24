@@ -91,7 +91,9 @@ export class EditNote extends React.PureComponent<
     if (!files) return
 
     this.setState({
-      file: files[0]
+      file: files[0],
+      newNoteName: this.state.enote.name,
+      newNote: this.state.enote.note 
     })
   }
 

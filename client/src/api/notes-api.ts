@@ -43,6 +43,18 @@ export async function patchNote(
   })
 }
 
+export async function deleteNote(
+  idToken: string,
+  noteId: string
+): Promise<void> {
+  await Axios.delete(`${apiEndpoint}/notes/${noteId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    }
+  })
+}
+
 export async function getUploadUrl(
   idToken: string,
   noteId: string
